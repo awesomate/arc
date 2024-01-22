@@ -22,7 +22,14 @@ jobs:
     - name: Kubectl tool installer
       uses: Azure/setup-kubectl@v3
 
-    - run: kubectl delete secret arc-version --namespace=$NAMESPACE --kubeconfig=kubeconfig.yaml
+    - run: 
+        try {
+          kubectl delete secret arc-version --namespace=$NAMESPACE --kubeconfig=kubeconfig.yaml
+        }
+        catch {
+          echo "secret does not exist"
+        }
+        try
 
     - run: kubectl create secret generic arc-version --namespace=$NAMESPACE --from-literal version=$VERSION --kubeconfig=kubeconfig.yaml
 
