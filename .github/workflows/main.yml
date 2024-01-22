@@ -1,0 +1,39 @@
+name: Deploy ARC into Kubernetes
+on:
+  workflow_dispatch:
+
+env:
+  DATADOG_APP_KEY: ${{ secrets.DATADOG_APP_KEY }}
+  DATADOG_API_KEY: ${{ secrets.DATADOG_API_KEY }}
+  NAMESPACE: arc-systems
+  VERSION: 1.0.6
+
+jobs:
+  Deploy-Cluster:
+    runs-on: gha-runner-scale-set
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    - run: ls
+    - run: sudo apt-get -y update
+    - run: sudo apt-get -y install zip
+    - run: echo ${{ secrets.KUBE_CONFIG }} | base64 --decode > kubeconfig.yaml
+
+    - name: Kubectl tool installer
+      uses: Azure/setup-kubectl@v3
+
+    - run: kubectl delete secret arc-version --namespace=$NAMESPACE --kubeconfig=kubeconfig.yaml
+
+    - run: kubectl create secret generic arc-version --namespace=$NAMESPACE --from-literal version=$VERSION --kubeconfig=kubeconfig.yaml
+
+    - run: kubectl get secrets/arc-version --namespace="arc-systems" -o json --kubeconfig=kubeconfig.yaml
+
+    # - uses: cschleiden/replace-tokens@v1
+    #   with:
+    #     tokenPrefix: '${'
+    #     tokenSuffix: '}'
+    #     files: '["**/*.yaml"]'
+    # - name: Helm tool installer
+    #   uses: Azure/setup-helm@v3
+    #   with:
+    #     token: ${{ secrets.GITHUB_TOKEN }}
