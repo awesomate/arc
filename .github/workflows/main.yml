@@ -25,9 +25,9 @@ jobs:
     - run:  chmod +x ./kubectl
     - run:  sudo mv ./kubectl /usr/local/bin/kubectl
 
-    - run: echo VERSON=$(kubectl get secrets/arc-version --namespace=$NAMESPACE -o json --kubeconfig kubeconfig.yaml | jq -r .data.version | base64 --decode)
+    - run: echo VERSON=$(kubectl get secrets/arc-version --namespace=$NAMESPACE -o json --kubeconfig kubeconfig.yaml | jq -r .data.version | base64 --decode) >> $GITHUB_ENV
 
-    - run: echo VERSONBUMP=$(echo $VERSON | awk -F. '/[0-9]+\./{$NF++;print}' OFS=.)
+    - run: echo VERSONBUMP=$(echo $VERSON | awk -F. '/[0-9]+\./{$NF++;print}' OFS=.) >> $GITHUB_ENV
 
     - run: kubectl delete secret arc-version --namespace=$NAMESPACE --kubeconfig=kubeconfig.yaml || echo "secret does not exist"
 
