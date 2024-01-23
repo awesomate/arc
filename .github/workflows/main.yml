@@ -4,7 +4,6 @@ on:
 
 env:
   NAMESPACE: arc-systems
-  VERSION: 1.0.6
 
 jobs:
   Deploy-Cluster:
@@ -17,19 +16,23 @@ jobs:
     - run: sudo apt-get -y install zip
     - run: echo ${{ secrets.KUBE_CONFIG }} | base64 --decode > kubeconfig.yaml
 
-    - name: Kubectl tool installer
-      run:
-        sudo apt update -y
-        sudo apt upgrade -y
-        sudo apt install -y curl
-        sudo apt install -y jq
+    - run: sudo apt update -y
+    - run: sudo apt upgrade -y
+    - run: sudo apt install -y curl
+    - run: sudo apt install -y jq
 
-    - run: 
-        kubectl delete secret arc-version --namespace=$NAMESPACE --kubeconfig=kubeconfig.yaml || echo "secret does not exist"
+    - run:  curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
+    - run:  chmod +x ./kubectl
+    - run:  sudo mv ./kubectl /usr/local/bin/kubectl
 
-    - run: kubectl create secret generic arc-version --namespace=$NAMESPACE --from-literal version=$VERSION --kubeconfig=kubeconfig.yaml
+    - run: echo VERSON=$(kubectl get secrets/arc-version --namespace=$NAMESPACE -o json --kubeconfig kubeconfig.yaml | jq -r .data.version | base64 --decode)
 
-    - run: kubectl get secrets/arc-version --namespace=$NAMESPACE -o json --kubeconfig kubeconfig.yaml | jq -r .data.version | base64 --decode
+    - run: echo VERSONBUMP=$(echo $VERSON | awk -F. '/[0-9]+\./{$NF++;print}' OFS=.)
+
+    - run: kubectl delete secret arc-version --namespace=$NAMESPACE --kubeconfig=kubeconfig.yaml || echo "secret does not exist"
+
+    - run: kubectl create secret generic arc-version --namespace=$NAMESPACE --from-literal version=$VERSONBUMP --kubeconfig=kubeconfig.yaml
+
 
     # - uses: cschleiden/replace-tokens@v1
     #   with:
