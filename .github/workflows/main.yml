@@ -20,6 +20,9 @@ jobs:
     - name: Kubectl tool installer
       uses: Azure/setup-kubectl@v3
 
+    - name: Install jq
+      uses: dcarbone/install-jq-action@v2.1.0
+
     - run: 
         kubectl delete secret arc-version --namespace=$NAMESPACE --kubeconfig=kubeconfig.yaml || echo "secret does not exist"
 
