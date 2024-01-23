@@ -18,10 +18,11 @@ jobs:
     - run: echo ${{ secrets.KUBE_CONFIG }} | base64 --decode > kubeconfig.yaml
 
     - name: Kubectl tool installer
-      uses: Azure/setup-kubectl@v3
-
-    - name: Install jq
-      uses: dcarbone/install-jq-action@v2.1.0
+      runs:
+        sudo apt update -y
+        sudo apt upgrade -y
+        sudo apt install -y curl
+        sudo apt install -y jq
 
     - run: 
         kubectl delete secret arc-version --namespace=$NAMESPACE --kubeconfig=kubeconfig.yaml || echo "secret does not exist"
