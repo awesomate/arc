@@ -25,7 +25,7 @@ jobs:
 
     - run: kubectl create secret generic arc-version --namespace=$NAMESPACE --from-literal version=$VERSION --kubeconfig=kubeconfig.yaml
 
-    - run: kubectl get secrets/arc-version --namespace="arc-systems" -o json --kubeconfig=kubeconfig.yaml | base64 --decode
+    - run: kubectl get secrets/arc-version --namespace=$NAMESPACE -o json --kubeconfig kubeconfig.yaml | jq -r .data.version | base64 --decode
 
     # - uses: cschleiden/replace-tokens@v1
     #   with:
